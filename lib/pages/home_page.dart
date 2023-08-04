@@ -1,7 +1,10 @@
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:task_manager/components/add_task_modal.dart';
+import 'package:task_manager/model/task_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,6 +18,39 @@ class _HomePageState extends State<HomePage> {
   bool _customDueTime = false;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+
+  List<Task> dummyTasks = [
+    Task(
+        title: 'Task 1',
+        description: 'Complete Flutter app',
+        dueDate: DateTime.now().add(Duration(days: 1)),
+        status: true),
+    Task(
+        title: 'Task 2',
+        description: 'Write documentation',
+        dueDate: DateTime.now().add(Duration(days: 3)),
+        status: false),
+    Task(
+        title: 'Task 3',
+        description: 'Refactor code',
+        dueDate: DateTime.now().add(Duration(days: 5)),
+        status: true),
+    Task(
+        title: 'Task 1',
+        description: 'Complete Flutter app',
+        dueDate: DateTime.now().add(Duration(days: 1)),
+        status: false),
+    Task(
+        title: 'Task 2',
+        description: 'Write documentation',
+        dueDate: DateTime.now().add(Duration(days: 3)),
+        status: false),
+    Task(
+        title: 'Task 3',
+        description: 'Refactor code',
+        dueDate: DateTime.now().add(Duration(days: 5)),
+        status: false),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -94,13 +130,75 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
               ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                child: DottedBorder(
+                  color: Theme.of(context).primaryColor,
+                  borderType: BorderType.RRect,
+                  strokeWidth: 2,
+                  dashPattern: const [8, 3],
+                  radius: const Radius.circular(12),
+                  padding: const EdgeInsets.all(20),
+                  child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      child: Container(
+                        padding: const EdgeInsets.all(25),
+                        child: Center(
+                          child: Column(
+                            children: const [
+                              Icon(Icons.hourglass_empty),
+                              Text(
+                                "No Task In Progress",
+                                style: TextStyle(color: Colors.black),
+                              )
+                            ],
+                          ),
+                        ),
+                      )),
+                ),
+              ),
               const Text(
-                'Tasks',
+                'Today`s Tasks',
                 style: TextStyle(
                     fontSize: 20,
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
               ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: dummyTasks.length,
+                  itemBuilder: (context, index) {
+                    Task task = dummyTasks[index];
+                    return Card(
+                      color: Colors.green[50],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          task.title,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor),
+                        ),
+                        trailing: MSHCheckbox(
+                          size: 25,
+                          value: task.status,
+                          colorConfig:
+                              MSHColorConfig.fromCheckedUncheckedDisabled(
+                            checkedColor: Theme.of(context).primaryColor,
+                            uncheckedColor: Theme.of(context).primaryColor,
+                          ),
+                          style: MSHCheckboxStyle.fillScaleColor,
+                          onChanged: (selected) {
+                            setState(() {});
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              )
             ],
           ),
         ),
@@ -112,15 +210,16 @@ class _HomePageState extends State<HomePage> {
           },
           child: const Icon(Icons.add),
         ),
-        bottomNavigationBar: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.0),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: GNav(
               gap: 5,
-              duration: Duration(milliseconds: 800),
+              duration: const Duration(milliseconds: 800),
               activeColor: Colors.white,
-              tabBackgroundColor: Colors.green,
-              padding: EdgeInsets.all(15.0),
-              tabs: [
+              color: Theme.of(context).primaryColor,
+              tabBackgroundColor: Theme.of(context).primaryColor,
+              padding: const EdgeInsets.all(15.0),
+              tabs: const [
                 GButton(
                   icon: Icons.home,
                   text: 'Home',
@@ -136,7 +235,6 @@ class _HomePageState extends State<HomePage> {
               ]),
         ));
   }
-
 
   void _showAddTaskDialog(BuildContext context) {
     showDialog(

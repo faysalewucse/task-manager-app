@@ -30,6 +30,9 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
   bool _customDueDate = false;
   bool _customDueTime = false;
 
+  TextEditingController title = TextEditingController();
+  TextEditingController description = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -52,9 +55,11 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
         children: [
           TextFormField(
             decoration: InputDecoration(labelText: 'Title'),
+            controller: title,
           ),
           TextFormField(
             decoration: InputDecoration(labelText: 'Description'),
+            controller: description,
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
@@ -112,7 +117,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            print(title.text + "**" + description.text);
           },
           child: const Text('Add'),
         ),
