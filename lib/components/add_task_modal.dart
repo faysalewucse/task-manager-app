@@ -1,34 +1,27 @@
 import 'package:flutter/material.dart';
 
 class AddTaskDialog extends StatefulWidget {
-  final bool customDueDate;
   final bool customDueTime;
   final DateTime selectedDate;
   final TimeOfDay selectedTime;
-  final ValueChanged<bool> onCustomDueDateChanged;
   final ValueChanged<bool> onCustomDueTimeChanged;
-  final ValueChanged<DateTime> onDateChanged;
-  final ValueChanged<TimeOfDay> onTimeChanged;
 
   const AddTaskDialog({
-    required this.customDueDate,
+    super.key,
     required this.customDueTime,
     required this.selectedDate,
     required this.selectedTime,
-    required this.onCustomDueDateChanged,
     required this.onCustomDueTimeChanged,
-    required this.onDateChanged,
-    required this.onTimeChanged,
   });
 
   @override
-  _AddTaskDialogState createState() => _AddTaskDialogState();
+  AddTaskDialogState createState() => AddTaskDialogState();
 }
 
-class _AddTaskDialogState extends State<AddTaskDialog> {
-
-  bool _customDueDate = false;
+class AddTaskDialogState extends State<AddTaskDialog> {
   bool _customDueTime = false;
+  DateTime selectedDate = DateTime.now();
+  TimeOfDay selectedTime = TimeOfDay.now();
 
   TextEditingController title = TextEditingController();
   TextEditingController description = TextEditingController();
@@ -36,12 +29,15 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
   @override
   void initState() {
     super.initState();
-    _customDueDate = widget.customDueDate;
     _customDueTime = widget.customDueTime;
+    selectedDate = widget.selectedDate;
+    selectedTime = widget.selectedTime;
   }
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15.0),
@@ -50,74 +46,76 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
         'Add Task',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            decoration: InputDecoration(labelText: 'Title'),
-            controller: title,
-          ),
-          TextFormField(
-            decoration: InputDecoration(labelText: 'Description'),
-            controller: description,
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Checkbox(
-              value: _customDueDate,
-              onChanged: (newValue) {
-                setState(() {
-                  _customDueDate = newValue!;
-                  widget.onCustomDueDateChanged(newValue);
-                });
+      content: Container(
+        width: width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              decoration: const InputDecoration(hintText: 'Title'),
+              controller: title,
+              maxLines: null,
+              validator: (String? value) {
+                return (value == null) ? 'Title is blank' : null;
               },
             ),
-            title: Text('Set Due Date'),
-            subtitle: Text(
-              '${widget.selectedDate.year}-${widget.selectedDate.month}-${widget.selectedDate.day} ${widget.selectedTime.format(context)}',
+            TextFormField(
+              decoration: const InputDecoration(hintText: 'Description'),
+              controller: description,
+              maxLines: null,
             ),
-            onTap: () async {
-              final newDate = await showDatePicker(
-                context: context,
-                initialDate: widget.selectedDate,
-                firstDate: DateTime.now(),
-                lastDate: DateTime(2101),
-              );
-              if (newDate != null) {
-                widget.onDateChanged(newDate);
-              }
-            },
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-
-            leading: Checkbox(
-              value: _customDueTime,
-              onChanged: (newValue) {
-                setState(() {
-                  _customDueTime = newValue!;
-                  widget.onCustomDueTimeChanged(newValue);
-                });
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Set Due Date'),
+              subtitle: Text(
+                '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+              ),
+              onTap: () async {
+                final newDate = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime(2101),
+                );
+                if (newDate != null) {
+                  setState(() {
+                    selectedDate = newDate;
+                  });
+                }
               },
             ),
-            title: const Text('Set Due Time'),
-            subtitle: Text(widget.selectedTime.format(context)),
-            onTap: () async {
-              final newTime = await showTimePicker(
-                context: context,
-                initialTime: widget.selectedTime,
-              );
-              if (newTime != null) {
-                widget.onTimeChanged(newTime);
-              }
-            },
-          ),
-        ],
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Checkbox(
+                value: _customDueTime,
+                onChanged: (newValue) {
+                  setState(() {
+                    _customDueTime = newValue!;
+                    widget.onCustomDueTimeChanged(newValue);
+                  });
+                },
+              ),
+              title: const Text('Set Due Time'),
+              subtitle: Text(selectedTime.format(context)),
+              onTap: () async {
+                final newTime = await showTimePicker(
+                  context: context,
+                  initialTime: selectedTime,
+                );
+                if (newTime != null) {
+                  setState(() {
+                    selectedTime = newTime;
+                  });
+                }
+              },
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
           onPressed: () {
-            print(title.text + "**" + description.text);
+            print("${title.text}**${description.text}");
           },
           child: const Text('Add'),
         ),

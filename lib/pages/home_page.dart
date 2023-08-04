@@ -14,10 +14,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _customDueDate = false;
   bool _customDueTime = false;
-  DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
+  final DateTime _selectedDate = DateTime.now();
+  final TimeOfDay _selectedTime = TimeOfDay.now();
 
   List<Task> dummyTasks = [
     Task(
@@ -135,8 +134,8 @@ class _HomePageState extends State<HomePage> {
                 child: DottedBorder(
                   color: Theme.of(context).primaryColor,
                   borderType: BorderType.RRect,
-                  strokeWidth: 2,
-                  dashPattern: const [8, 3],
+                  strokeWidth: 1,
+                  dashPattern: const [8, 4],
                   radius: const Radius.circular(12),
                   padding: const EdgeInsets.all(20),
                   child: ClipRRect(
@@ -241,30 +240,14 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AddTaskDialog(
-          customDueDate: _customDueDate,
           customDueTime: _customDueTime,
           selectedDate: _selectedDate,
           selectedTime: _selectedTime,
-          onCustomDueDateChanged: (newValue) {
-            setState(() {
-              _customDueDate = newValue;
-            });
-          },
           onCustomDueTimeChanged: (newValue) {
             setState(() {
               _customDueTime = newValue;
             });
-          },
-          onDateChanged: (newDate) {
-            setState(() {
-              _selectedDate = newDate;
-            });
-          },
-          onTimeChanged: (newTime) {
-            setState(() {
-              _selectedTime = newTime;
-            });
-          },
+          }
         );
       },
     );
