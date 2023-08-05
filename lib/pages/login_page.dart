@@ -23,13 +23,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-
     String? errorMessage = '';
     TextEditingController email = TextEditingController();
     TextEditingController password = TextEditingController();
 
     Future signInWithEmailAndPassword() async {
-      print("Called");
       try {
         await Auth().signInWithEmailAndPassword(
             email: email.text, password: password.text);
@@ -39,13 +37,13 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     }
-    
+
     Future createUserWithEmailAndPassword() async {
-      print("Called");
       try {
-        await Auth().signInWithEmailAndPassword(
+        await Auth().createUserWithEmailAndPassword(
             email: email.text, password: password.text);
       } on FirebaseAuthException catch (e) {
+        print("Error: ${e.message!}");
         setState(() {
           errorMessage = e.message;
         });
@@ -53,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         color: Colors.grey[200],
         child: Padding(
@@ -76,14 +75,18 @@ class _LoginPageState extends State<LoginPage> {
                   height: 40,
                 ),
                 AuthFormField(
-                    controller: email, hintText: 'Email', icon: Icons.email),
+                    controller: email,
+                    hintText: 'Email',
+                    icon: Icons.email,
+                    keyboardType: TextInputType.emailAddress),
                 const SizedBox(
                   height: 10,
                 ),
                 AuthFormField(
                     controller: password,
                     hintText: 'Password',
-                    icon: Icons.lock),
+                    icon: Icons.lock,
+                keyboardType: TextInputType.visiblePassword,),
                 const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
@@ -95,12 +98,9 @@ class _LoginPageState extends State<LoginPage> {
                         elevation: 2,
                       ),
                       onPressed: () {
-                        if(loginPage){
-                          signInWithEmailAndPassword();
-                        }
-                        else{
-                          createUserWithEmailAndPassword();
-                        }
+                        loginPage
+                            ? signInWithEmailAndPassword()
+                            : createUserWithEmailAndPassword();
                       },
                       child: Text(
                         loginPage ? 'Login' : 'Register',
@@ -150,7 +150,10 @@ class _LoginPageState extends State<LoginPage> {
                       icon: const Icon(LineIcons.googlePlus),
                       label: const Text('Continue with Google')),
                 ),
-                Text(errorMessage!, style: TextStyle(color: Colors.redAccent),)
+                Text(
+                  errorMessage!,
+                  style: const TextStyle(color: Colors.redAccent),
+                )
               ],
             ),
           ),
