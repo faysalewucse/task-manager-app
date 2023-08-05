@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_manager/components/task_form_field.dart';
 
 class AddTaskDialog extends StatefulWidget {
   final bool customDueTime;
@@ -51,19 +52,8 @@ class AddTaskDialogState extends State<AddTaskDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextFormField(
-              decoration: const InputDecoration(hintText: 'Title'),
-              controller: title,
-              maxLines: null,
-              validator: (String? value) {
-                return (value == null) ? 'Title is blank' : null;
-              },
-            ),
-            TextFormField(
-              decoration: const InputDecoration(hintText: 'Description'),
-              controller: description,
-              maxLines: null,
-            ),
+            TaskFormField(controller: title, hintText: 'Title'),
+            TaskFormField(controller: description, hintText: 'Description'),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Set Due Date'),
@@ -115,15 +105,20 @@ class AddTaskDialogState extends State<AddTaskDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            print("${title.text}**${description.text}");
-          },
-          child: const Text('Add'),
-        ),
-        TextButton(
-          onPressed: () {
             Navigator.of(context).pop();
           },
           child: const Text('Cancel'),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.green,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+
+          ),
+          onPressed: () {
+            print("${title.text}**${description.text}");
+          },
+          child: const Text('Add', style: TextStyle(color: Colors.white),),
         ),
       ],
     );

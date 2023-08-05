@@ -1,9 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:task_manager/pages/home_page.dart';
+import 'package:task_manager/widget_tree.dart';
 
-void main() {
+Future main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.white, // navigation bar color
   ));
@@ -28,7 +31,7 @@ class MyApp extends StatelessWidget {
           ),
         primarySwatch: Colors.green
       ),
-      home: const HomePage(),
+      home: const WidgetTree(),
     );
   }
 }

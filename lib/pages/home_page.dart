@@ -57,148 +57,151 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Text("Task Manager"),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Theme.of(context).primaryColor,
-                  boxShadow: const [
-                    BoxShadow(color: Colors.green, spreadRadius: 3),
-                  ],
-                ),
-                padding: const EdgeInsets.all(20),
-                width: double.infinity,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Your Today's task",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const Text(
-                          "Almost Completed",
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 15),
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              backgroundColor: Colors.white,
-                            ),
-                            onPressed: () {},
-                            child: const Text(
-                              'View Task',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    CircularPercentIndicator(
-                      radius: 55.0,
-                      lineWidth: 15.0,
-                      percent: 0.8,
-                      circularStrokeCap: CircularStrokeCap.round,
-                      backgroundColor: Colors.black12,
-                      center: const Text(
-                        "80%",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      progressColor: Colors.white,
-                    )
-                  ],
-                ),
-              ),
-              const Text(
-                'In Progress',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: DottedBorder(
-                  color: Theme.of(context).primaryColor,
-                  borderType: BorderType.RRect,
-                  strokeWidth: 1,
-                  dashPattern: const [8, 4],
-                  radius: const Radius.circular(12),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Theme.of(context).primaryColor,
+                    boxShadow: const [
+                      BoxShadow(color: Colors.green, spreadRadius: 3),
+                    ],
+                  ),
                   padding: const EdgeInsets.all(20),
-                  child: ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(12)),
-                      child: Container(
-                        padding: const EdgeInsets.all(25),
-                        child: Center(
-                          child: Column(
-                            children: const [
-                              Icon(Icons.hourglass_empty),
-                              Text(
-                                "No Task In Progress",
-                                style: TextStyle(color: Colors.black),
-                              )
-                            ],
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Your Today's task",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const Text(
+                            "Almost Completed",
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(top: 15),
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                backgroundColor: Colors.white,
+                              ),
+                              onPressed: () {},
+                              child: const Text(
+                                'View Task',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      CircularPercentIndicator(
+                        radius: 55.0,
+                        lineWidth: 15.0,
+                        percent: 0.8,
+                        circularStrokeCap: CircularStrokeCap.round,
+                        backgroundColor: Colors.black12,
+                        center: const Text(
+                          "80%",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        progressColor: Colors.white,
+                      )
+                    ],
+                  ),
+                ),
+                const Text(
+                  'In Progress',
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  child: DottedBorder(
+                    color: Theme.of(context).primaryColor,
+                    borderType: BorderType.RRect,
+                    strokeWidth: 1,
+                    dashPattern: const [8, 4],
+                    radius: const Radius.circular(12),
+                    padding: const EdgeInsets.all(20),
+                    child: ClipRRect(
+                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                        child: Container(
+                          padding: const EdgeInsets.all(25),
+                          child: Center(
+                            child: Column(
+                              children: const [
+                                Icon(Icons.hourglass_empty),
+                                Text(
+                                  "No Task In Progress",
+                                  style: TextStyle(color: Colors.black),
+                                )
+                              ],
+                            ),
+                          ),
+                        )),
+                  ),
+                ),
+                const Text(
+                  'Today`s Tasks',
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    itemCount: dummyTasks.length,
+                    itemBuilder: (context, index) {
+                      Task task = dummyTasks[index];
+                      return Card(
+                        color: Colors.green[50],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            task.title,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor),
+                          ),
+                          trailing: MSHCheckbox(
+                            size: 25,
+                            value: task.status,
+                            colorConfig:
+                                MSHColorConfig.fromCheckedUncheckedDisabled(
+                              checkedColor: Theme.of(context).primaryColor,
+                              uncheckedColor: Theme.of(context).primaryColor,
+                            ),
+                            style: MSHCheckboxStyle.fillScaleColor,
+                            onChanged: (selected) {
+                              setState(() {});
+                            },
                           ),
                         ),
-                      )),
-                ),
-              ),
-              const Text(
-                'Today`s Tasks',
-                style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: dummyTasks.length,
-                  itemBuilder: (context, index) {
-                    Task task = dummyTasks[index];
-                    return Card(
-                      color: Colors.green[50],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          task.title,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).primaryColor),
-                        ),
-                        trailing: MSHCheckbox(
-                          size: 25,
-                          value: task.status,
-                          colorConfig:
-                              MSHColorConfig.fromCheckedUncheckedDisabled(
-                            checkedColor: Theme.of(context).primaryColor,
-                            uncheckedColor: Theme.of(context).primaryColor,
-                          ),
-                          style: MSHCheckboxStyle.fillScaleColor,
-                          onChanged: (selected) {
-                            setState(() {});
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              )
-            ],
+                      );
+                    },
+                  ),
+                )
+              ],
+            ),
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -240,15 +243,14 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AddTaskDialog(
-          customDueTime: _customDueTime,
-          selectedDate: _selectedDate,
-          selectedTime: _selectedTime,
-          onCustomDueTimeChanged: (newValue) {
-            setState(() {
-              _customDueTime = newValue;
+            customDueTime: _customDueTime,
+            selectedDate: _selectedDate,
+            selectedTime: _selectedTime,
+            onCustomDueTimeChanged: (newValue) {
+              setState(() {
+                _customDueTime = newValue;
+              });
             });
-          }
-        );
       },
     );
   }
