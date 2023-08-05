@@ -19,6 +19,8 @@ dependencies:
   msh_checkbox: ^2.0.1
   firebase_core:
   firebase_auth:
+  fluttertoast: ^8.2.2
+
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,5 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:task_manager/components/add_task_modal.dart';
@@ -14,6 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   bool _customDueTime = false;
   final DateTime _selectedDate = DateTime.now();
   final TimeOfDay _selectedTime = TimeOfDay.now();
@@ -54,9 +54,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Task Manager"),
-        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -211,31 +208,8 @@ class _HomePageState extends State<HomePage> {
             _showAddTaskDialog(context);
           },
           child: const Icon(Icons.add),
-        ),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-          child: GNav(
-              gap: 5,
-              duration: const Duration(milliseconds: 800),
-              activeColor: Colors.white,
-              color: Theme.of(context).primaryColor,
-              tabBackgroundColor: Theme.of(context).primaryColor,
-              padding: const EdgeInsets.all(15.0),
-              tabs: const [
-                GButton(
-                  icon: Icons.home,
-                  text: 'Home',
-                ),
-                GButton(
-                  icon: Icons.view_agenda,
-                  text: 'My Tasks',
-                ),
-                GButton(
-                  icon: Icons.person_2_outlined,
-                  text: 'Profile',
-                )
-              ]),
-        ));
+        )
+    );
   }
 
   void _showAddTaskDialog(BuildContext context) {
