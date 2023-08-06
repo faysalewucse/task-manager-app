@@ -1,7 +1,11 @@
 import 'package:dotted_border/dotted_border.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:task_manager/auth/auth.dart';
 import 'package:task_manager/components/add_task_modal.dart';
 import 'package:task_manager/model/task_model.dart';
 
@@ -13,46 +17,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
+  User? user = Auth().currentUser;
   bool _customDueTime = false;
   final DateTime _selectedDate = DateTime.now();
-  final TimeOfDay _selectedTime = TimeOfDay.now();
-
-  List<Task> dummyTasks = [
-    Task(
-        title: 'Task 1',
-        description: 'Complete Flutter app',
-        dueDate: DateTime.now().add(Duration(days: 1)),
-        status: true),
-    Task(
-        title: 'Task 2',
-        description: 'Write documentation',
-        dueDate: DateTime.now().add(Duration(days: 3)),
-        status: false),
-    Task(
-        title: 'Task 3',
-        description: 'Refactor code',
-        dueDate: DateTime.now().add(Duration(days: 5)),
-        status: true),
-    Task(
-        title: 'Task 1',
-        description: 'Complete Flutter app',
-        dueDate: DateTime.now().add(Duration(days: 1)),
-        status: false),
-    Task(
-        title: 'Task 2',
-        description: 'Write documentation',
-        dueDate: DateTime.now().add(Duration(days: 3)),
-        status: false),
-    Task(
-        title: 'Task 3',
-        description: 'Refactor code',
-        dueDate: DateTime.now().add(Duration(days: 5)),
-        status: false),
-  ];
+  final TimeOfDay _selectedTime = const TimeOfDay(hour: 23, minute: 59);
 
   @override
   Widget build(BuildContext context) {
+    DatabaseReference userRef = FirebaseDatabase.instance.ref(user!.uid);
+
     return Scaffold(
         body: SingleChildScrollView(
           child: Padding(
@@ -137,7 +110,8 @@ class _HomePageState extends State<HomePage> {
                     radius: const Radius.circular(12),
                     padding: const EdgeInsets.all(20),
                     child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(12)),
                         child: Container(
                           padding: const EdgeInsets.all(25),
                           child: Center(
@@ -162,41 +136,54 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
-                  height: 300,
-                  child: ListView.builder(
-                    itemCount: dummyTasks.length,
-                    itemBuilder: (context, index) {
-                      Task task = dummyTasks[index];
-                      return Card(
-                        color: Colors.green[50],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                    height: 300,
+                    child: FirebaseAnimatedList(
+                      shrinkWrap: true,
+                      defaultChild: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 5,
+                          color: Theme.of(context).primaryColor,
                         ),
-                        child: ListTile(
-                          title: Text(
-                            task.title,
-                            style: TextStyle(
+                      ),
+                      query: userRef,
+                      itemBuilder: (BuildContext context, DataSnapshot snapshot,
+                          Animation<double> animation, int index) {
+                        Map<dynamic, dynamic> task =
+                            snapshot.value as Map<dynamic, dynamic>;
+
+                        return Card(
+                          color: Colors.green[50],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              task['title'],
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor),
-                          ),
-                          trailing: MSHCheckbox(
-                            size: 25,
-                            value: task.status,
-                            colorConfig:
-                                MSHColorConfig.fromCheckedUncheckedDisabled(
-                              checkedColor: Theme.of(context).primaryColor,
-                              uncheckedColor: Theme.of(context).primaryColor,
+                                color: Theme.of(context).primaryColor,
+                              ),
                             ),
-                            style: MSHCheckboxStyle.fillScaleColor,
-                            onChanged: (selected) {
-                              setState(() {});
-                            },
+                            trailing: MSHCheckbox(
+                              size: 25,
+                              value: task['status'] == 'true',
+                              colorConfig:
+                                  MSHColorConfig.fromCheckedUncheckedDisabled(
+                                checkedColor: Theme.of(context).primaryColor,
+                                uncheckedColor: Theme.of(context).primaryColor,
+                              ),
+                              style: MSHCheckboxStyle.fillScaleColor,
+                              onChanged: (selected) {
+                                // Update the data in the Firebase database
+                                userRef
+                                    .child(snapshot.key.toString())
+                                    .update({'status': selected.toString()});
+                              },
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                )
+                        );
+                      },
+                    )),
               ],
             ),
           ),
@@ -208,8 +195,7 @@ class _HomePageState extends State<HomePage> {
             _showAddTaskDialog(context);
           },
           child: const Icon(Icons.add),
-        )
-    );
+        ));
   }
 
   void _showAddTaskDialog(BuildContext context) {

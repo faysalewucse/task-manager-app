@@ -1,4 +1,9 @@
+import 'package:easy_loading_button/easy_loading_button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
+import 'package:task_manager/auth/auth.dart';
 import 'package:task_manager/components/task_form_field.dart';
 
 class AddTaskDialog extends StatefulWidget {
@@ -22,7 +27,10 @@ class AddTaskDialog extends StatefulWidget {
 class AddTaskDialogState extends State<AddTaskDialog> {
   bool _customDueTime = false;
   DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay.now();
+  TimeOfDay selectedTime = const TimeOfDay(hour: 23, minute: 59);
+  User? user = Auth().currentUser;
+
+  final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
 
   TextEditingController title = TextEditingController();
   TextEditingController description = TextEditingController();
@@ -109,17 +117,39 @@ class AddTaskDialogState extends State<AddTaskDialog> {
           },
           child: const Text('Cancel'),
         ),
-        TextButton(
-          style: TextButton.styleFrom(
-            backgroundColor: Colors.green,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        Container(
+          width: 100,
+          child: RoundedLoadingButton(
+            controller: _btnController,
+            color: Theme.of(context).primaryColor,
+            onPressed: () {
+              DatabaseReference databaseReference =
+              FirebaseDatabase.instance.ref();
+              final user = this.user;
+              if (user != null) {
+                DatabaseReference userReference =
+                databaseReference.child(user.uid);
 
+                Map<String, String> task = {
+                  'title': title.text,
+                  'description': description.text,
+                  'dueDate': selectedDate.toString(),
+                  'dueTime': selectedTime.format(context),
+                  'status' : "false"
+                };
+
+                userReference.push().set(task).then((value) {
+                  // Data insertion successful
+                  Navigator.of(context).pop();
+                }).catchError((error) {
+                  // Handle error
+                  print("Error: $error");
+                });
+              }
+            },
+            child: const Text('Add', style: TextStyle(color: Colors.white)),
           ),
-          onPressed: () {
-            print("${title.text}**${description.text}");
-          },
-          child: const Text('Add', style: TextStyle(color: Colors.white),),
-        ),
+        )
       ],
     );
   }
