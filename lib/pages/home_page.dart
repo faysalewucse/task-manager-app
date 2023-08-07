@@ -8,6 +8,7 @@ import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:task_manager/auth/auth.dart';
 import 'package:task_manager/components/add_task_modal.dart';
+import 'package:task_manager/components/update_task_modal.dart';
 import 'package:task_manager/model/task_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,29 +34,36 @@ class _HomePageState extends State<HomePage> {
     Colors.purple,
   ];
 
-  bool compareDueDate(DateTime dateTime){
+  bool compareDueDate(DateTime dueDate) {
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
-    DateTime taskDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    DateTime taskDate = DateTime(dueDate.year, dueDate.month, dueDate.day);
     if (taskDate.isBefore(today)) {
       return true;
     }
     return false;
   }
 
-  num calculateTaskStatus(List tasks){
+  num calculateTaskStatus(List tasks) {
+    if(tasks.isEmpty) return 0;
     int taskCompleted = 0;
-    for(Task i in tasks){
-      if(i.status == true) taskCompleted ++;
+    for (Task i in tasks) {
+      if (i.status == true) taskCompleted++;
     }
-    int result = (100*taskCompleted)~/tasks.length;
+    int result = (100 * taskCompleted) ~/ tasks.length;
 
     return result;
   }
 
+  TimeOfDay convertTime(value) {
+    return TimeOfDay(
+      hour: int.parse(value['dueTime'].split(':')[0]),
+      minute: int.parse(value['dueTime'].split(':')[1].split(' ')[0]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-
     DatabaseReference userRef = FirebaseDatabase.instance.ref(user!.uid);
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -86,11 +94,10 @@ class _HomePageState extends State<HomePage> {
               title: value['title'],
               description: value['description'],
               dueDate: DateTime.parse(value['dueDate']),
-              dueTime: TimeOfDay(
-                hour: int.parse(value['dueTime'].split(':')[0]),
-                minute: int.parse(value['dueTime'].split(':')[1].split(' ')[0]),
-              ),
+              dueTime: convertTime(value),
               status: value['status'].toLowerCase() == 'true',
+              createdAt: DateTime.parse(value['createdAt']),
+              updatedAt: DateTime.parse(value['updatedAt']),
             ));
           });
         }
@@ -156,7 +163,8 @@ class _HomePageState extends State<HomePage> {
                             backgroundColor: Colors.black12,
                             center: Text(
                               "${calculateTaskStatus(tasks)}%",
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             progressColor: Colors.white,
                           )
@@ -207,12 +215,13 @@ class _HomePageState extends State<HomePage> {
                               scrollDirection: Axis.horizontal,
                               itemCount: tasks.length,
                               itemBuilder: (BuildContext context, int index) {
-
                                 return Container(
                                   width: 200,
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withOpacity(0.1),
                                       border: Border.all(color: Colors.green),
                                       borderRadius:
                                           BorderRadius.circular(10.0)),
@@ -241,7 +250,8 @@ class _HomePageState extends State<HomePage> {
                                             style: TextStyle(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.bold,
-                                                color: compareDueDate(tasks[index].dueDate)
+                                                color: compareDueDate(
+                                                        tasks[index].dueDate)
                                                     ? Colors.redAccent
                                                     : Theme.of(context)
                                                         .primaryColor),
@@ -275,35 +285,40 @@ class _HomePageState extends State<HomePage> {
                           itemCount: tasks.length,
                           itemBuilder: (context, index) {
                             Task task = tasks[index];
-                            return Card(
-                              color: Colors.green[50],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: ListTile(
-                                title: Text(
-                                  task.title,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                            return GestureDetector(
+                              onTap: (){
+                                _showUpdateTaskDialog(context, task);
+                              },
+                              child: Card(
+                                color: Colors.green[50],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
                                 ),
-                                trailing: MSHCheckbox(
-                                  size: 25,
-                                  value: task.status == true,
-                                  colorConfig: MSHColorConfig
-                                      .fromCheckedUncheckedDisabled(
-                                    checkedColor:
-                                        Theme.of(context).primaryColor,
-                                    uncheckedColor:
-                                        Theme.of(context).primaryColor,
+                                child: ListTile(
+                                  title: Text(
+                                    task.title,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
                                   ),
-                                  style: MSHCheckboxStyle.fillScaleColor,
-                                  onChanged: (selected) {
-                                    // Update the data in the Firebase database
-                                    userRef.child(task.id.toString()).update(
-                                        {'status': selected.toString()});
-                                  },
+                                  trailing: MSHCheckbox(
+                                    size: 25,
+                                    value: task.status == true,
+                                    colorConfig: MSHColorConfig
+                                        .fromCheckedUncheckedDisabled(
+                                      checkedColor:
+                                          Theme.of(context).primaryColor,
+                                      uncheckedColor:
+                                          Theme.of(context).primaryColor,
+                                    ),
+                                    style: MSHCheckboxStyle.fillScaleColor,
+                                    onChanged: (selected) {
+                                      // Update the data in the Firebase database
+                                      userRef.child(task.id.toString()).update(
+                                          {'status': selected.toString()});
+                                    },
+                                  ),
                                 ),
                               ),
                             );
@@ -330,7 +345,6 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AddTaskDialog(
-            customDueTime: _customDueTime,
             selectedDate: _selectedDate,
             selectedTime: _selectedTime,
             onCustomDueTimeChanged: (newValue) {
@@ -338,6 +352,15 @@ class _HomePageState extends State<HomePage> {
                 _customDueTime = newValue;
               });
             });
+      },
+    );
+  }
+
+  void _showUpdateTaskDialog(BuildContext context, Task task) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return UpdateTaskDialog(task: task);
       },
     );
   }

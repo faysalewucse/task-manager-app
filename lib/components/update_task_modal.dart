@@ -5,41 +5,42 @@ import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:task_manager/auth/auth.dart';
 import 'package:task_manager/components/task_form_field.dart';
 
-class AddTaskDialog extends StatefulWidget {
-  final DateTime selectedDate;
-  final TimeOfDay selectedTime;
-  final ValueChanged<bool> onCustomDueTimeChanged;
+import '../model/task_model.dart';
 
-  const AddTaskDialog({
+class UpdateTaskDialog extends StatefulWidget {
+  final Task task;
+
+  const UpdateTaskDialog({
     super.key,
-    required this.selectedDate,
-    required this.selectedTime,
-    required this.onCustomDueTimeChanged,
+    required this.task
   });
 
   @override
-  AddTaskDialogState createState() => AddTaskDialogState();
+  UpdateTaskDialogState createState() => UpdateTaskDialogState();
 }
 
-class AddTaskDialogState extends State<AddTaskDialog> {
-  DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = const TimeOfDay(hour: 23, minute: 59);
+class UpdateTaskDialogState extends State<UpdateTaskDialog> {
+  late Task _task;
+  late DateTime selectedDate;
+  late TimeOfDay selectedTime;
   User? user = Auth().currentUser;
 
-  final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
-
-  TextEditingController title = TextEditingController();
-  TextEditingController description = TextEditingController();
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
 
   @override
   void initState() {
     super.initState();
-    selectedDate = widget.selectedDate;
-    selectedTime = widget.selectedTime;
+    _task = widget.task;
+    selectedDate = widget.task.dueDate;
+    selectedTime = widget.task.dueTime;
   }
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController title = TextEditingController(text: _task.title);
+    TextEditingController description = TextEditingController(text: _task.description);
+
     double width = MediaQuery.of(context).size.width;
 
     return AlertDialog(
@@ -47,7 +48,7 @@ class AddTaskDialogState extends State<AddTaskDialog> {
         borderRadius: BorderRadius.circular(15.0),
       ),
       title: const Text(
-        'Add Task',
+        'Update Task',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       content: SizedBox(
@@ -61,12 +62,12 @@ class AddTaskDialogState extends State<AddTaskDialog> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Set Due Date'),
               subtitle: Text(
-                '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                '${_task.dueDate.day}/${_task.dueDate.month}/${_task.dueDate.year}',
               ),
               onTap: () async {
                 final newDate = await showDatePicker(
                   context: context,
-                  initialDate: selectedDate,
+                  initialDate: _task.dueDate,
                   firstDate: DateTime.now(),
                   lastDate: DateTime(2101),
                 );
@@ -80,11 +81,11 @@ class AddTaskDialogState extends State<AddTaskDialog> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Set Due Time'),
-              subtitle: Text(selectedTime.format(context)),
+              subtitle: Text(_task.dueTime.format(context)),
               onTap: () async {
                 final newTime = await showTimePicker(
                   context: context,
-                  initialTime: selectedTime,
+                  initialTime: _task.dueTime,
                 );
                 if (newTime != null) {
                   setState(() {
@@ -103,18 +104,18 @@ class AddTaskDialogState extends State<AddTaskDialog> {
           },
           child: const Text('Cancel'),
         ),
-        Container(
+        SizedBox(
           width: 100,
           child: RoundedLoadingButton(
             controller: _btnController,
             color: Theme.of(context).primaryColor,
             onPressed: () {
               DatabaseReference databaseReference =
-              FirebaseDatabase.instance.ref();
+                  FirebaseDatabase.instance.ref();
               final user = this.user;
               if (user != null) {
                 DatabaseReference userReference =
-                databaseReference.child(user.uid);
+                    databaseReference.child(user.uid);
 
                 Map<String, String> task = {
                   'title': title.text,
@@ -123,19 +124,19 @@ class AddTaskDialogState extends State<AddTaskDialog> {
                   'updatedAt': DateTime.now().toString(),
                   'dueDate': selectedDate.toString(),
                   'dueTime': selectedTime.format(context),
-                  'status' : "false"
+                  'status': "false"
                 };
 
-                userReference.push().set(task).then((value) {
+                userReference.child(_task.id).update(task).then((value) {
                   // Data insertion successful
                   Navigator.of(context).pop();
                 }).catchError((error) {
                   // Handle error
-                  print("Error: $error");
+                  _btnController.stop();
                 });
               }
             },
-            child: const Text('Add', style: TextStyle(color: Colors.white)),
+            child: const Text('Update', style: TextStyle(color: Colors.white)),
           ),
         )
       ],

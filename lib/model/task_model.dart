@@ -5,6 +5,8 @@ class Task {
   final String title;
   final String description;
   final DateTime dueDate;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   final TimeOfDay dueTime;
   final bool status;
 
@@ -13,6 +15,8 @@ class Task {
     required this.description,
     required this.dueDate,
     required this.dueTime,
+    required this.createdAt,
+    required this.updatedAt,
     required this.status,
     required this.id,
   });
