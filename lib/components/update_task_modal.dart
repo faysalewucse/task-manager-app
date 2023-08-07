@@ -105,7 +105,32 @@ class UpdateTaskDialogState extends State<UpdateTaskDialog> {
           child: const Text('Cancel'),
         ),
         SizedBox(
-          width: 100,
+          width: 80,
+          child: RoundedLoadingButton(
+            controller: _btnController,
+            color: Colors.redAccent,
+            onPressed: () {
+              DatabaseReference databaseReference =
+                  FirebaseDatabase.instance.ref();
+              final user = this.user;
+              if (user != null) {
+                DatabaseReference userReference =
+                    databaseReference.child(user.uid);
+
+                userReference.child(_task.id).remove().then((value) {
+                  // Data insertion successful
+                  Navigator.of(context).pop();
+                }).catchError((error) {
+                  // Handle error
+                  _btnController.stop();
+                });
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+          ),
+        ),
+        SizedBox(
+          width: 90,
           child: RoundedLoadingButton(
             controller: _btnController,
             color: Theme.of(context).primaryColor,
