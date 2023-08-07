@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:task_manager/pages/all_tasks.dart';
 import 'package:task_manager/pages/home_page.dart';
 import 'package:task_manager/pages/user_profile.dart';
 
@@ -13,20 +14,26 @@ class HomeLayout extends StatefulWidget {
 class _HomeLayoutState extends State<HomeLayout> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomePage(),
-    HomePage(),
-    ProfilePage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+     void onTabChange(int index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+
+     final List<Widget> widgetOptions = <Widget>[
+      HomePage(onTabChange: onTabChange),
+      const AllTask(),
+      const ProfilePage(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Task Manager"),
       ),
         body: Center(
-          child: _widgetOptions.elementAt(_selectedIndex),
+          child: widgetOptions.elementAt(_selectedIndex),
         ),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),

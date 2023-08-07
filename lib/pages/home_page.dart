@@ -1,18 +1,19 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:task_manager/auth/auth.dart';
 import 'package:task_manager/components/add_task_modal.dart';
-import 'package:task_manager/components/update_task_modal.dart';
 import 'package:task_manager/model/task_model.dart';
+import 'package:task_manager/utility/functions.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final void Function(int) onTabChange;
+
+  const HomePage({Key? key, required this.onTabChange}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -44,8 +45,15 @@ class _HomePageState extends State<HomePage> {
     return false;
   }
 
+  bool compareWithToday(DateTime createdAt) {
+    DateTime now = DateTime.now();
+    return now.year == createdAt.year &&
+        now.month == createdAt.month &&
+        now.day == createdAt.day;
+  }
+
   num calculateTaskStatus(List tasks) {
-    if(tasks.isEmpty) return 0;
+    if (tasks.isEmpty) return 0;
     int taskCompleted = 0;
     for (Task i in tasks) {
       if (i.status == true) taskCompleted++;
@@ -53,13 +61,6 @@ class _HomePageState extends State<HomePage> {
     int result = (100 * taskCompleted) ~/ tasks.length;
 
     return result;
-  }
-
-  TimeOfDay convertTime(value) {
-    return TimeOfDay(
-      hour: int.parse(value['dueTime'].split(':')[0]),
-      minute: int.parse(value['dueTime'].split(':')[1].split(' ')[0]),
-    );
   }
 
   @override
@@ -129,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                "Your Today's task",
+                                "Your overall task",
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
@@ -145,7 +146,9 @@ class _HomePageState extends State<HomePage> {
                                         horizontal: 20),
                                     backgroundColor: Colors.white,
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    widget.onTabChange(1);
+                                  },
                                   child: const Text(
                                     'View Task',
                                     style:
@@ -215,16 +218,19 @@ class _HomePageState extends State<HomePage> {
                               scrollDirection: Axis.horizontal,
                               itemCount: tasks.length,
                               itemBuilder: (BuildContext context, int index) {
+                                if (tasks[index].status == true) {
+                                  return Container();
+                                }
                                 return Container(
                                   width: 200,
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .primaryColor
-                                          .withOpacity(0.1),
-                                      border: Border.all(color: Colors.green),
-                                      borderRadius:
-                                          BorderRadius.circular(10.0)),
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.1),
+                                    border: Border.all(color: Colors.green),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
                                   margin: const EdgeInsets.fromLTRB(0, 5, 5, 5),
                                   child: Column(
                                     mainAxisAlignment:
@@ -237,9 +243,9 @@ class _HomePageState extends State<HomePage> {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).primaryColor),
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
                                       ),
                                       Column(
                                         crossAxisAlignment:
@@ -248,21 +254,23 @@ class _HomePageState extends State<HomePage> {
                                           Text(
                                             "Due: ${formatter.format(tasks[index].dueDate)}",
                                             style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: compareDueDate(
-                                                        tasks[index].dueDate)
-                                                    ? Colors.redAccent
-                                                    : Theme.of(context)
-                                                        .primaryColor),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: compareDueDate(
+                                                      tasks[index].dueDate)
+                                                  ? Colors.redAccent
+                                                  : Theme.of(context)
+                                                      .primaryColor,
+                                            ),
                                           ),
                                           Text(
                                             "Time: ${tasks[index].dueTime.format(context)}",
                                             style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Theme.of(context)
-                                                    .primaryColor),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -270,8 +278,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 );
                               },
-                            ),
-                          ),
+                            )),
                     const Text(
                       'Today`s Tasks',
                       style: TextStyle(
@@ -285,9 +292,12 @@ class _HomePageState extends State<HomePage> {
                           itemCount: tasks.length,
                           itemBuilder: (context, index) {
                             Task task = tasks[index];
+                            if (task.createdAt.day != DateTime.now().day) {
+                              return Container();
+                            }
                             return GestureDetector(
-                              onTap: (){
-                                _showUpdateTaskDialog(context, task);
+                              onTap: () {
+                                showUpdateTaskDialog(context, task);
                               },
                               child: Card(
                                 color: Colors.green[50],
@@ -352,15 +362,6 @@ class _HomePageState extends State<HomePage> {
                 _customDueTime = newValue;
               });
             });
-      },
-    );
-  }
-
-  void _showUpdateTaskDialog(BuildContext context, Task task) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return UpdateTaskDialog(task: task);
       },
     );
   }

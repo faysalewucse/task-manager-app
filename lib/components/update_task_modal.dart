@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:task_manager/auth/auth.dart';
 import 'package:task_manager/components/task_form_field.dart';
-
 import '../model/task_model.dart';
 
 class UpdateTaskDialog extends StatefulWidget {
@@ -145,11 +144,9 @@ class UpdateTaskDialogState extends State<UpdateTaskDialog> {
                 Map<String, String> task = {
                   'title': title.text,
                   'description': description.text,
-                  'createdAt': DateTime.now().toString(),
                   'updatedAt': DateTime.now().toString(),
                   'dueDate': selectedDate.toString(),
                   'dueTime': selectedTime.format(context),
-                  'status': "false"
                 };
 
                 userReference.child(_task.id).update(task).then((value) {
