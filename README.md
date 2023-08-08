@@ -14,3 +14,5 @@ A new Flutter project.
 #06.08.2023
     - Dynamic value in progressbar and In Progress tasks
     - implement StreamBuilder
+#07.08.2023
+    - Completed requirements.
