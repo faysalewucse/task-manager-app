@@ -15,6 +15,8 @@ class AllTask extends StatefulWidget {
 
 class _AllTaskState extends State<AllTask> {
   User? user = Auth().currentUser;
+  List<String> list = <String>['All', 'Completed', 'Uncompleted'];
+  String dropdownValue = "All";
 
   @override
   Widget build(BuildContext context) {
@@ -43,16 +45,21 @@ class _AllTaskState extends State<AllTask> {
 
           if (dataMap != null) {
             dataMap.forEach((key, value) {
-              tasks.add(Task(
-                id: key,
-                title: value['title'],
-                description: value['description'],
-                dueDate: DateTime.parse(value['dueDate']),
-                dueTime: convertTime(value),
-                status: value['status'].toLowerCase() == 'true',
-                createdAt: DateTime.parse(value['createdAt']),
-                updatedAt: DateTime.parse(value['updatedAt']),
-              ));
+              bool status = value['status'].toLowerCase() == 'true';
+              if (dropdownValue == 'All' ||
+                  (dropdownValue == 'Completed' && status) ||
+                  (dropdownValue == 'Uncompleted' && !status)) {
+                tasks.add(Task(
+                  id: key,
+                  title: value['title'],
+                  description: value['description'],
+                  dueDate: DateTime.parse(value['dueDate']),
+                  dueTime: convertTime(value),
+                  status: status,
+                  createdAt: DateTime.parse(value['createdAt']),
+                  updatedAt: DateTime.parse(value['updatedAt']),
+                ));
+              }
             });
           }
 
@@ -63,26 +70,54 @@ class _AllTaskState extends State<AllTask> {
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'All Tasks',
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'All Tasks',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                DropdownButton(
+                                  value: dropdownValue,
+                                  icon: const Icon(Icons.filter_list),
+                                  elevation: 16,
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontWeight: FontWeight.bold),
+                                  borderRadius: BorderRadius.circular(10),
+                                  onChanged: (String? value) {
+                                    setState(() {
+                                      dropdownValue = value!;
+                                    });
+                                  },
+                                  items: list.map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                )
+                              ],
                             ),
+                            const SizedBox(height: 10),
                             SizedBox(
                                 height: screenHeight * 0.4,
                                 child: ListView.builder(
                                   itemCount: tasks.length,
                                   itemBuilder: (context, index) {
                                     Task task = tasks[index];
-
                                     return GestureDetector(
                                       onTap: () {
                                         showUpdateTaskDialog(context, task);
                                       },
                                       child: Card(
-                                        color: Colors.green[50],
+                                        color: task.status
+                                            ? Colors.green[50]
+                                            : Colors.red[50],
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(10.0),
@@ -92,8 +127,10 @@ class _AllTaskState extends State<AllTask> {
                                             task.title,
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: Theme.of(context)
-                                                  .primaryColor,
+                                              color: task.status
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : Colors.redAccent,
                                             ),
                                           ),
                                           trailing: MSHCheckbox(
